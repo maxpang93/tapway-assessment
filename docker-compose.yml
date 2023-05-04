@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+  producer:
+    build: ./producer
+    ports:
+      - "5000:5000"
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_network
+      
+  rabbitmq:
+    image: rabbitmq:3.11-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    networks:
+      - rabbitmq_network
+
+  consumer:
+    build: ./consumer
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./consumer_data:/app/data
+    #restart: on-failure  # temporary work-around. consumer always try to connect to rabbitmq before it's ready. Fixed by adding healthcheck and depends_on.condition == service_healthy
+    networks:
+      - rabbitmq_network
+
+networks:
+  rabbitmq_network: {}
