@@ -4,14 +4,11 @@ import os
 import csv
 import json
 from datetime import datetime
-import logging
 
 
 CSV_FILEPATH = "./data/data.csv"
 
 def main():
-    #print(f"inside consumer.py main() at {datetime.now()}")
-    logging.info(f"inside consumer.py main() at {datetime.now()}")
     _init_csv()
     connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
     channel = connection.channel()
@@ -19,8 +16,6 @@ def main():
 
     def callback(ch, method, properties, body):
         msg = json.loads(body.decode())
-        #print(f"receive msg at {datetime.now()}")
-        logging.info(f"receive msg at {datetime.now()}")
         _append_data_to_csv(msg)
 
     channel.basic_consume(
