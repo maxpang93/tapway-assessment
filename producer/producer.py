@@ -2,28 +2,28 @@ from flask import Flask, request, jsonify
 import pika
 import json
 from datetime import datetime
-import jsonschema
+from custom_validator import validate_data
 
 app = Flask(__name__)
-
-with open("schema.json") as f:
-    schema = json.load(f)
 
 @app.route('/', methods=['POST'])
 def validate_and_pass_to_queue():
     payload = request.get_json()
 
     # validate payload
-    try:
-        jsonschema.validate(payload, schema)
-    except jsonschema.exceptions.ValidationError as err:
-        return jsonify({"error": err.message}), 400
-
+    err = validate_data(payload, show_full_error=False)
+    if err:
+        return jsonify({
+            "error": "Invalid JSON data",
+            "details": ';  '.join(err)
+        }), 400
+    
+    # append tag
     for pred in payload["data"]["preds"]:
         pred["image_frame"] = None # TODO remove frame to display less data, remove later
         if pred["prob"] < 0.25:
             pred["tags"].append("low_prob")
-
+    
     # publish the msg to RabbitMQ
     connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
     channel = connection.channel()
@@ -44,4 +44,4 @@ def validate_and_pass_to_queue():
     })
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)
