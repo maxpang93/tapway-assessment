@@ -1,0 +1,28 @@
+{
+    "type": "object",
+    "properties": {
+        "device_id": {"type": "string"},
+        "client_id": {"type": "string"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "data": {
+            "type": "object",
+            "properties": {
+                "license_id": {"type": "string"},
+                "preds": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "image_frame": {"type": "string"},
+                            "prob": {"type": "number"},
+                            "tags": {"type": "array", "items": {"type": "string"}}
+                        },
+                        "required": ["image_frame", "prob", "tags"]
+                    }
+                }
+            },
+            "required": ["license_id", "preds"]
+        }
+    },
+    "required": ["device_id", "client_id", "created_at", "data"]
+}

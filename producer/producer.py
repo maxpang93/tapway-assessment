@@ -1,30 +1,28 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import pika
 import json
 from datetime import datetime
+import jsonschema
 
 app = Flask(__name__)
+
+with open("schema.json") as f:
+    schema = json.load(f)
 
 @app.route('/', methods=['POST'])
 def validate_and_pass_to_queue():
     payload = request.get_json()
 
-    # validate payload TODO
-    require_fields = ["device_id", "client_id", "created_at"]
-    for field in require_fields:
-        print(payload[field])
+    # validate payload
+    try:
+        jsonschema.validate(payload, schema)
+    except jsonschema.exceptions.ValidationError as err:
+        return jsonify({"error": err.message}), 400
 
-    preds = payload["data"]["preds"]
-    # for pred in preds:
-    #     print(pred["prob"], pred["tags"])
-
-    for pred in preds:
-        pred["image_frame"] = None # remove frame to display less data, remove later
+    for pred in payload["data"]["preds"]:
+        pred["image_frame"] = None # TODO remove frame to display less data, remove later
         if pred["prob"] < 0.25:
             pred["tags"].append("low_prob")
-
-    # for pred in preds:
-    #     print(pred["prob"], pred["tags"])
 
     # publish the msg to RabbitMQ
     connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
@@ -40,7 +38,10 @@ def validate_and_pass_to_queue():
 
     connection.close()
 
-    return f'Message published to Queue at {timestamp}'
+    return jsonify({
+        "success": True,
+        "msg":f"Message published to Queue at {timestamp}"
+    })
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)
