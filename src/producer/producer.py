@@ -20,7 +20,6 @@ def validate_and_pass_to_queue():
     
     # append tag
     for pred in payload["data"]["preds"]:
-        pred["image_frame"] = None # TODO remove frame to display less data, remove later
         if pred["prob"] < 0.25:
             pred["tags"].append("low_prob")
     
