@@ -3,5 +3,5 @@ COPY requirements.txt /app/requirements.txt
 WORKDIR /app
 RUN pip install -r requirements.txt
 COPY producer.py /app/producer.py
-#EXPOSE 5000
+COPY ./utils /app/utils
 CMD ["python", "producer.py"]
