@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import pika
 import json
 from datetime import datetime
-from custom_validator import validate_data
+from utils.custom_validator import validate_data
 
 app = Flask(__name__)
 

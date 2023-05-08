@@ -2,6 +2,7 @@ import json
 from jsonschema import validators, Draft202012Validator
 import base64
 from datetime import datetime
+import os
 
 """
 1. Extends latest validator with 'base64' and 'datetime' types
@@ -23,7 +24,9 @@ def is_datetime(checker, instance):
     except:
         return False
 
-with open("schema.json") as f:
+current_dir = os.path.dirname(os.path.abspath(__file__))
+schema_path = os.path.join(current_dir,"schema.json")
+with open(schema_path) as f:
     schema = json.load(f)
 
 type_checker = Draft202012Validator.TYPE_CHECKER.redefine_many({
