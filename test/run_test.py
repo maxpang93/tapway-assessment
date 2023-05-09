@@ -39,7 +39,7 @@ def main():
         try:
             # make sure have python interpreter installed and run:
             # 1. "pip install -r requirements.txt" 
-            # 2. "python test.py"
+            # 2. "python run_test.py"
             res = requests.post(url="http://localhost:5000", json=data)
         except:
             # alternatively, use docker instead and run:
