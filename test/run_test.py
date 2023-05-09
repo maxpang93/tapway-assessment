@@ -36,14 +36,21 @@ def main():
                 ]
             }
         }
-        res = requests.post(url="http://0.0.0.0:5000", json=data)
+        try:
+            # make sure have python interpreter installed and run:
+            # 1. "pip install -r requirements.txt" 
+            # 2. "python test.py"
+            res = requests.post(url="http://localhost:5000", json=data)
+        except:
+            # alternatively, use docker instead and run:
+            # 1. docker run -it --rm --network tapway-assessment_rabbitmq_network $(docker build -q .) python run_test.py
+            res = requests.post(url="http://producer:5000", json=data)
         print(f"Request {i+1}: {res.text}")
-        time.sleep(1)
 
 
 if __name__ == "__main__":
     start = time.time()
     main()
     end = time.time()
-    print(f"Finished in {(end - start)} s")
+    print(f"Finished in {(end - start):.2f} s")
 
